@@ -1,48 +1,163 @@
-import Link from "next/link";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { PreferencesManager } from '@/components/PreferencesManager';
+import { CustomerData } from '@/lib/types/customer';
+
+// Mock data for development
+const mockCustomerData: CustomerData = {
+  phoneNumber: "27829940527",
+  type: "vodacomMobile",
+  marketingEmail: "",
+  personId: "1234",
+  lastUpdated: "2025-04-29T12:00:00Z",
+  marketingPreferences: [
+    {
+      preference: "contentBillingNotifications",
+      description: "Vodacom Billing Services",
+      readonly: true,
+      communicationChannels: {
+        all: { value: true, description: "ALL" },
+        email: { value: true, description: "E-mail" },
+        call: { value: true, description: "Phone Call" },
+        messaging: { value: true, description: "SMS" },
+        ussdPushNotification: { value: true, description: "USSD" },
+        whatsapp: { value: true, description: "Whatsapp" }
+      }
+    },
+    {
+      preference: "vodacomMobileServices",
+      description: "Vodacom Mobile Services",
+      communicationChannels: {
+        all: { value: false, description: "ALL" },
+        email: { value: false, description: "E-mail" },
+        call: { value: true, description: "Phone Call" },
+        messaging: { value: true, description: "SMS" },
+        ussdPushNotification: { value: false, description: "USSD" },
+        whatsapp: { value: true, description: "Whatsapp" }
+      }
+    },
+    {
+      preference: "vodacomFixedServices",
+      description: "Vodacom Fixed Services",
+      readonly: false,
+      communicationChannels: {
+        all: { value: false, description: "ALL" },
+        email: { value: true, description: "E-mail" },
+        call: { value: false, description: "Phone Call" },
+        messaging: { value: true, description: "SMS" },
+        ussdPushNotification: { value: false, description: "USSD" },
+        whatsapp: { value: true, description: "Whatsapp" }
+      }
+    },
+    {
+      preference: "vodacomFinancialServices",
+      description: "Vodacom Financial Services",
+      communicationChannels: {
+        all: { value: true, description: "ALL" },
+        email: { value: true, description: "E-mail" },
+        call: { value: true, description: "Phone Call" },
+        messaging: { value: true, description: "SMS" },
+        ussdPushNotification: { value: true, description: "USSD" },
+        whatsapp: { value: true, description: "Whatsapp" }
+      }
+    },
+    {
+      preference: "vodacomContentServices",
+      description: "Vodacom Content Services",
+      optIn: true,
+      communicationChannels: {
+        all: { value: false, description: "ALL" },
+        email: { value: true, description: "E-mail" },
+        call: { value: false, description: "Phone Call" },
+        messaging: { value: true, description: "SMS" },
+        ussdPushNotification: { value: false, description: "USSD" },
+        whatsapp: { value: true, description: "Whatsapp" }
+      }
+    },
+    {
+      preference: "vodacomPartnerOffers",
+      description: "Vodacom Partner Offers",
+      optIn: true,
+      communicationChannels: {
+        all: { value: false, description: "ALL" },
+        email: { value: false, description: "E-mail" },
+        call: { value: false, description: "Phone Call" },
+        messaging: { value: true, description: "SMS" },
+        ussdPushNotification: { value: false, description: "USSD" },
+        whatsapp: { value: true, description: "Whatsapp" }
+      }
+    }
+  ]
+};
+
+export default function PortletPage() {
+  const [customer, setCustomer] = useState<CustomerData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // In a real implementation, this would fetch data based on the phone number
+    // passed from the parent application
+    const fetchCustomerData = async () => {
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setCustomer(mockCustomerData);
+      } catch (err) {
+        setError('Failed to load customer data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCustomerData();
+  }, []);
+
+  const handleUpdatePreferences = async (updatedPreferences: CustomerData['marketingPreferences']) => {
+    // In a real implementation, this would make an API call to update preferences
+    console.log('Updating preferences:', updatedPreferences);
+    if (customer) {
+      setCustomer({
+        ...customer,
+        marketingPreferences: updatedPreferences
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (!customer) {
+    return null;
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-8">
-      <div>
-        <h2 className="text-2xl font-semibold text-center border p-4 font-mono rounded-md">
-          Get started by choosing a template path from the /paths/ folder.
-        </h2>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-[1200px] mx-auto">
+        <PreferencesManager 
+          customer={customer} 
+          onUpdatePreferences={handleUpdatePreferences} 
+        />
       </div>
-      <div>
-        <h1 className="text-6xl font-bold text-center">Make anything you imagine 🪄</h1>
-        <h2 className="text-2xl text-center font-light text-gray-500 pt-4">
-          This whole page will be replaced when you run your template path.
-        </h2>
-      </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Chat App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            An intelligent conversational app powered by AI models, featuring real-time responses
-            and seamless integration with Next.js and various AI providers.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Image Generation App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Create images from text prompts using AI, powered by the Replicate API and Next.js.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Social Media App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A feature-rich social platform with user profiles, posts, and interactions using
-            Firebase and Next.js.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Voice Notes App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A voice-based note-taking app with real-time transcription using Deepgram API, 
-            Firebase integration for storage, and a clean, simple interface built with Next.js.
-          </p>
-        </div>
-      </div>
-    </main>
+    </div>
   );
 }
