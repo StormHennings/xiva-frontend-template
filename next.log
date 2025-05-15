@@ -1,0 +1,19 @@
+
+> template-2@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.7
+  - Local:        http://localhost:3003
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1858ms
+ ○ Compiling / ...
+ ✓ Compiled / in 4.3s (788 modules)
+ GET /?cell=0812323 200 in 4577ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 1781ms (449 modules)
+ GET /favicon.ico 200 in 1883ms
+ GET /?cell=0812323 200 in 133ms
+ GET / 200 in 45ms
+ GET /?cell=0812323 200 in 104ms

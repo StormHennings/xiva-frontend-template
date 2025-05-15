@@ -1,12 +1,6 @@
-'use client';
+import { NextRequest, NextResponse } from 'next/server';
+import { CustomerData } from '@/lib/types/customer';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { PreferencesManager } from '@/components/PreferencesManager';
-import { CustomerData, MarketingPreference, CommunicationChannels } from '@/lib/types/customer';
-import { getCustomerPreferences, saveCustomerPreferences } from '@/lib/api';
-
-// Mock data for development
 const mockCustomerData: CustomerData = {
   phoneNumber: "27829940527",
   type: "vodacomMobile",
@@ -93,104 +87,13 @@ const mockCustomerData: CustomerData = {
   ]
 };
 
-function transformApiPreferences(apiPrefs: any[], phoneNumber: string): CustomerData {
-  return {
-    phoneNumber,
-    type: '',
-    marketingEmail: '',
-    personId: '',
-    lastUpdated: '',
-    marketingPreferences: apiPrefs.map((pref) => ({
-      preference: pref.preference_key,
-      description: pref.preference_description,
-      readonly: pref.metadata?.readonly,
-      optIn: pref.metadata?.optIn,
-      communicationChannels: pref.channels,
-    })),
-  };
-}
-
-export default function PortletPage() {
-  const [customer, setCustomer] = useState<CustomerData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const fetchCustomer = async () => {
-      setLoading(true);
-      setError(null);
-      const cellphone = searchParams.get('cellphone');
-      try {
-        if (cellphone) {
-          const apiPrefs = await getCustomerPreferences(cellphone);
-          // If the API returns an array, transform it
-          if (Array.isArray(apiPrefs)) {
-            setCustomer(transformApiPreferences(apiPrefs, cellphone));
-          } else {
-            setCustomer(apiPrefs); // fallback for old format
-          }
-        } else {
-          setCustomer(mockCustomerData);
-        }
-      } catch (err) {
-        setError('Failed to load customer data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCustomer();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-
-  const handleUpdatePreferences = async (updatedPreferences: CustomerData['marketingPreferences']) => {
-    if (customer) {
-      const updatedCustomer = {
-        ...customer,
-        marketingPreferences: updatedPreferences
-      };
-      setCustomer(updatedCustomer);
-      try {
-        await saveCustomerPreferences(updatedCustomer);
-      } catch (err) {
-        setError('Failed to save preferences');
-      }
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const cellphone = searchParams.get('cellphone');
+  if (!cellphone) {
+    return NextResponse.json({ error: 'Missing cellphone parameter' }, { status: 400 });
   }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      </div>
-    );
-  }
-
-  if (!customer) {
-    return null;
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-[1200px] mx-auto">
-        <PreferencesManager 
-          customer={customer} 
-          onUpdatePreferences={handleUpdatePreferences} 
-        />
-      </div>
-    </div>
-  );
-}
+  // In a real implementation, fetch data for the cellphone here
+  // For now, return mock data
+  return NextResponse.json({ ...mockCustomerData, phoneNumber: cellphone });
+} 
